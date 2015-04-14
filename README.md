@@ -11,7 +11,7 @@ To allow a service to be configured in multiple different ways:
 
 ## Features
 
-Loading mechanisms:
+Loading mechanisms (in order of precedence):
 - Config as flag json string: `-config={ "key": "value" }`
 - Config as flag path to json file: `-configPath=/path/to/config.json`
 - Config as environment variable json string: `CONFIG={ "key": "value" }`
