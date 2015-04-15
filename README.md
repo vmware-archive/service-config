@@ -21,6 +21,16 @@ Loading mechanisms (in order of precedence):
 
 See the [example service](examples/test_service.go) for usage.
 
+## Dependencies
+
+service-config depends on [candiedyaml](https://github.com/cloudfoundry-incubator/candiedyaml) for json & yaml parsing.
+
+Install candiedyaml:
+
+```
+$ go get -u github.com/cloudfoundry-incubator/candiedyaml
+```
+
 ## License
 
 Copyright 2015 Pivotal Software, Inc

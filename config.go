@@ -1,13 +1,14 @@
 package service_config
 
 import (
-	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/cloudfoundry-incubator/candiedyaml"
 )
 
 const (
@@ -83,7 +84,7 @@ func (c ServiceConfig) Read(model interface{}) error {
 		return err
 	}
 
-	err = json.Unmarshal(bytes, model)
+	err = candiedyaml.Unmarshal(bytes, model)
 	if err != nil {
 		return errors.New(fmt.Sprintf("Unmarshaling config: %s", err.Error()))
 	}
