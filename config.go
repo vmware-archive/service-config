@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -38,12 +39,12 @@ func (c ServiceConfig) ConfigBytes() ([]byte, error) {
 	if c.configPathFlag != "" {
 		absolutePath, err := filepath.Abs(c.configPathFlag)
 		if err != nil {
-			return nil, err
+			return nil, errors.New(fmt.Sprintf("Making config file path absolute: %s", err.Error()))
 		}
 
 		bytes, err := ioutil.ReadFile(absolutePath)
 		if err != nil {
-			return nil, err
+			return nil, errors.New(fmt.Sprintf("Reading config file: %s", err.Error()))
 		}
 
 		return bytes, nil
@@ -58,12 +59,12 @@ func (c ServiceConfig) ConfigBytes() ([]byte, error) {
 	if configPath != "" {
 		absolutePath, err := filepath.Abs(configPath)
 		if err != nil {
-			return nil, err
+			return nil, errors.New(fmt.Sprintf("Making config file path absolute: %s", err.Error()))
 		}
 
 		bytes, err := ioutil.ReadFile(absolutePath)
 		if err != nil {
-			return nil, err
+			return nil, errors.New(fmt.Sprintf("Reading config file: %s", err.Error()))
 		}
 
 		return bytes, nil
@@ -84,7 +85,7 @@ func (c ServiceConfig) Read(model interface{}) error {
 
 	err = json.Unmarshal(bytes, model)
 	if err != nil {
-		return err
+		return errors.New(fmt.Sprintf("Unmarshaling config: %s", err.Error()))
 	}
 
 	return nil
