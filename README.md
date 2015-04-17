@@ -1,5 +1,7 @@
 # service-config
 
+[![Build Status](https://travis-ci.org/pivotal-cf-experimental/service-config.svg)](https://travis-ci.org/pivotal-cf-experimental/service-config)
+
 Tiny Go library for flexible config file loading.
 
 ## Why?
