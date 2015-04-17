@@ -9,9 +9,10 @@ import (
 )
 
 type ShipConfig struct {
-	Name string
-	ID   int
-	Crew Crew
+	Name   string
+	ID     int
+	Crew   Crew
+	Active bool
 }
 
 type Crew struct {
@@ -33,6 +34,11 @@ func main() {
 	serviceConfig := service_config.New()
 
 	flags := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+
+	serviceConfig.AddDefaults(ShipConfig{
+		Active: true,
+	})
+
 	serviceConfig.AddFlags(flags)
 	flags.Parse(os.Args[1:])
 

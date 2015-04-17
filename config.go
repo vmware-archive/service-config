@@ -4,9 +4,12 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/fraenkel/candiedyaml"
 )
 
 const (
@@ -19,15 +22,24 @@ var NoConfigError = errors.New("No Config or Config Path Specified. Please suppl
 type ServiceConfig struct {
 	configFlag     string
 	configPathFlag string
+	flagSet        *flag.FlagSet
+	defaultModel   interface{}
+	helpWriter     io.Writer
 }
 
 func New() *ServiceConfig {
-	return &ServiceConfig{}
+	return &ServiceConfig{
+		helpWriter: os.Stderr,
+	}
 }
 
 func (c *ServiceConfig) AddFlags(flagSet *flag.FlagSet) {
-	flagSet.StringVar(&c.configFlag, "config", "", "json encoded configuration string")
-	flagSet.StringVar(&c.configPathFlag, "configPath", "", "path to configuration file with json encoded content")
+	c.flagSet = flagSet
+	c.flagSet.StringVar(&c.configFlag, "config", "", "json encoded configuration string")
+	c.flagSet.StringVar(&c.configPathFlag, "configPath", "", "path to configuration file with json encoded content")
+
+	c.flagSet.SetOutput(c.helpWriter)
+	c.flagSet.Usage = c.PrintUsage
 }
 
 func (c ServiceConfig) ConfigBytes() ([]byte, error) {
@@ -83,7 +95,13 @@ func (c ServiceConfig) Read(model interface{}) error {
 	}
 
 	reader := NewReader(bytes)
-	err = reader.Read(model)
+
+	if c.defaultModel != nil {
+		err = reader.ReadWithDefaults(model, c.defaultModel)
+	} else {
+		err = reader.Read(model)
+	}
+
 	if err != nil {
 		return err
 	}
@@ -91,17 +109,20 @@ func (c ServiceConfig) Read(model interface{}) error {
 	return nil
 }
 
-func (c ServiceConfig) ReadWithDefaults(model interface{}, defaults interface{}) error {
-	bytes, err := c.ConfigBytes()
-	if err != nil {
-		return err
-	}
+func (c *ServiceConfig) AddDefaults(defaultModel interface{}) {
+	c.defaultModel = defaultModel
+}
 
-	reader := NewReader(bytes)
-	err = reader.ReadWithDefaults(model, defaults)
-	if err != nil {
-		return err
-	}
+func (c ServiceConfig) PrintUsage() {
+	fmt.Fprint(c.helpWriter, "Expected usage:\n")
+	c.flagSet.PrintDefaults()
 
-	return nil
+	if c.defaultModel != nil {
+		defaultStr, err := candiedyaml.Marshal(c.defaultModel)
+		if err != nil {
+			fmt.Fprintf(c.helpWriter, "Error printing defaults: %v", err)
+		} else {
+			fmt.Fprintf(c.helpWriter, "Default config values:\n%s", defaultStr)
+		}
+	}
 }

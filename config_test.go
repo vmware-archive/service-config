@@ -54,17 +54,21 @@ const configJSONAlt = `{
     }
 }`
 
-const configStructString = `main.ShipConfig{Name:"Enterprise", ID:1701, Crew:main.Crew{Officers:[]main.Officer{main.Officer{Name:"Kirk", Role:"Commanding Officer"}, main.Officer{Name:"Spock", Role:"First Officer/Science Officer"}, main.Officer{Name:"McCoy", Role:"Chief Medical Officer"}}, Passengers:[]main.Passenger{main.Passenger{Name:"Sarek", Title:"Federation Ambassador"}}}}`
+const configStructString = `main.ShipConfig{Name:"Enterprise", ID:1701, Crew:main.Crew{Officers:[]main.Officer{main.Officer{Name:"Kirk", Role:"Commanding Officer"}, main.Officer{Name:"Spock", Role:"First Officer/Science Officer"}, main.Officer{Name:"McCoy", Role:"Chief Medical Officer"}}, Passengers:[]main.Passenger{main.Passenger{Name:"Sarek", Title:"Federation Ambassador"}}}, Active:true}`
 
 var _ = Describe("ServiceConfig", func() {
-	var runTestService = func(command *exec.Cmd) (stdout, stderr string) {
+	var runTestServiceWithExitCode = func(command *exec.Cmd, exitCode int) (stdout, stderr string) {
 		session, err := gexec.Start(command, GinkgoWriter, GinkgoWriter)
 		Expect(err).ToNot(HaveOccurred())
 
 		session.Wait(30 * time.Second)
-		Expect(session).To(gexec.Exit(0))
+		Expect(session).To(gexec.Exit(exitCode))
 
 		return string(session.Out.Contents()), string(session.Err.Contents())
+	}
+
+	var runTestService = func(command *exec.Cmd) (stdout, stderr string) {
+		return runTestServiceWithExitCode(command, 0)
 	}
 
 	var writeFile = func(fileName, contents string) (filePath string) {
@@ -208,6 +212,33 @@ var _ = Describe("ServiceConfig", func() {
 
 			stdout, stderr := runTestService(command)
 			Expect(stdout).To(ContainSubstring("Config: %s", configStructString), "Unexpected output. STDERR:\n%s", stderr)
+		})
+	})
+
+	Context("When the help flag is passed", func() {
+
+		var (
+			stdout, stderr string
+		)
+
+		BeforeEach(func() {
+			command = exec.Command(
+				binaryPath,
+				"-h",
+			)
+
+			helpExitCode := 2
+			stdout, stderr = runTestServiceWithExitCode(command, helpExitCode)
+		})
+
+		It("Prints the list of config flags", func() {
+			Expect(stderr).To(ContainSubstring("-config"))
+			Expect(stderr).To(ContainSubstring("-configPath"))
+		})
+
+		It("Prints the default config options", func() {
+			Expect(stderr).To(ContainSubstring("Default config values:"))
+			Expect(stderr).To(MatchRegexp("\"Active\":\\s*true"))
 		})
 	})
 })
