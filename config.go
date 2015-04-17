@@ -39,7 +39,9 @@ func (c *ServiceConfig) AddFlags(flagSet *flag.FlagSet) {
 	c.flagSet.StringVar(&c.configPathFlag, "configPath", "", "path to configuration file with json encoded content")
 
 	c.flagSet.SetOutput(c.helpWriter)
-	c.flagSet.Usage = c.PrintUsage
+	c.flagSet.Usage = func() {
+		c.PrintUsage()
+	}
 }
 
 func (c ServiceConfig) ConfigBytes() ([]byte, error) {
