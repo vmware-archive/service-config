@@ -31,6 +31,27 @@ Install candiedyaml:
 $ go get -u github.com/cloudfoundry-incubator/candiedyaml
 ```
 
+## Limitations
+
+A non-empty default value can not be overridden by an empty provided value.
+
+To allow empty values in the config properties (e.g. `-config={ "password": "" }`),
+   the default value for that property must also be empty.
+
+For example, the following default config would allow a blank password to be provided:
+```
+err := reader.ReadWithDefaults(&config, DefaultConfig{
+   password: "",
+})
+```
+
+While this example would not allow the provided password to be blank:
+```
+err := reader.ReadWithDefaults(&config, DefaultConfig{
+   password: "password",
+})
+```
+
 ## License
 
 Copyright 2015 Pivotal Software, Inc
