@@ -7,8 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-
-	"github.com/cloudfoundry-incubator/candiedyaml"
 )
 
 const (
@@ -84,9 +82,10 @@ func (c ServiceConfig) Read(model interface{}) error {
 		return err
 	}
 
-	err = candiedyaml.Unmarshal(bytes, model)
+	reader := NewReader(bytes)
+	err = reader.Read(model)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Unmarshaling config: %s", err.Error()))
+		return err
 	}
 
 	return nil

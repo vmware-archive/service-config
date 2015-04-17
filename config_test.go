@@ -67,14 +67,14 @@ var _ = Describe("ServiceConfig", func() {
 		return string(session.Out.Contents()), string(session.Err.Contents())
 	}
 
-    var writeFile = func(fileName, contents string) (filePath string) {
-        filePath = filepath.Join(tempDir, "flag-config.json")
+	var writeFile = func(fileName, contents string) (filePath string) {
+		filePath = filepath.Join(tempDir, "flag-config.json")
 
-        err := ioutil.WriteFile(filePath, []byte(configJSON), os.ModePerm)
-        Expect(err).ToNot(HaveOccurred())
+		err := ioutil.WriteFile(filePath, []byte(configJSON), os.ModePerm)
+		Expect(err).ToNot(HaveOccurred())
 
-        return filePath
-    }
+		return filePath
+	}
 
 	var whitespacePattern = regexp.MustCompile("\\s+")
 	var command *exec.Cmd
