@@ -16,6 +16,16 @@ School:
   Name: UB
   Location: Buffalo
 `
+	const partialYAML = `---
+Name: yaml-name
+`
+	const nestedPartialYAML = `---
+Name: user-name
+Password: password
+School:
+  Location: nested-partialYAML
+`
+
 	type ConfigSimple struct {
 		Name string
 	}
@@ -71,6 +81,75 @@ School:
 			err := reader.Read(&invalidConfig)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("Unmarshaling config"))
+		})
+	})
+
+	Describe("ReadWithDefaults", func() {
+
+		Context("with empty defaults", func() {
+
+			var defaultConfig ConfigSimple
+
+			BeforeEach(func() {
+				defaultConfig = ConfigSimple{}
+			})
+
+			It("returns unmodified config", func() {
+				reader := service_config.NewReader([]byte(simpleYAML))
+
+				var simpleConfig ConfigSimple
+				err := reader.ReadWithDefaults(&simpleConfig, defaultConfig)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(simpleConfig).To(Equal(ConfigSimple{
+					Name: "test-user",
+				}))
+			})
+		})
+
+		It("adds default top-level field when property is not present", func() {
+
+			defaultConfig := School{
+				Name:     "default-name",
+				Location: "default-location",
+			}
+			reader := service_config.NewReader([]byte(partialYAML))
+
+			var schoolConfig School
+			err := reader.ReadWithDefaults(&schoolConfig, defaultConfig)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(schoolConfig).To(Equal(School{
+				Name:     "yaml-name",
+				Location: "default-location",
+			}))
+		})
+
+		It("adds default nested field when property is not present", func() {
+
+			defaultConfig := ConfigNested{
+				Name:     "default-username",
+				Password: "default-password",
+				School: School{
+					Name:     "default-schoolname",
+					Location: "default-schoolLocation",
+				},
+			}
+
+			reader := service_config.NewReader([]byte(nestedPartialYAML))
+
+			var nestedConfig ConfigNested
+			err := reader.ReadWithDefaults(&nestedConfig, defaultConfig)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(nestedConfig).To(Equal(ConfigNested{
+				Name:     "user-name",
+				Password: "password",
+				School: School{
+					Name:     "default-schoolname",
+					Location: "nested-partialYAML",
+				},
+			}))
 		})
 	})
 })

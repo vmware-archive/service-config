@@ -90,3 +90,18 @@ func (c ServiceConfig) Read(model interface{}) error {
 
 	return nil
 }
+
+func (c ServiceConfig) ReadWithDefaults(model interface{}, defaults interface{}) error {
+	bytes, err := c.ConfigBytes()
+	if err != nil {
+		return err
+	}
+
+	reader := NewReader(bytes)
+	err = reader.ReadWithDefaults(model, defaults)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

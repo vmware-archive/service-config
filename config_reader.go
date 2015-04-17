@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/fraenkel/candiedyaml"
+	"github.com/imdario/mergo"
 )
 
 type Reader struct {
@@ -24,4 +25,14 @@ func (r Reader) Read(model interface{}) error {
 	}
 
 	return nil
+}
+
+func (r Reader) ReadWithDefaults(model interface{}, defaults interface{}) error {
+
+	err := r.Read(model)
+	if err != nil {
+		return err
+	}
+
+	return mergo.Merge(model, defaults)
 }
