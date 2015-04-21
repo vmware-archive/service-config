@@ -16,6 +16,7 @@ To allow a service to be configured in multiple different ways:
 Loading mechanisms (in order of precedence):
 - Config as flag json string: `-config={ "key": "value" }`
 - Config as flag path to json file: `-configPath=/path/to/config.json`
+- The `-h` flag will print the above flags, as well as any defaults specified using the `AddDefaults` method
 - Config as environment variable json string: `CONFIG={ "key": "value" }`
 - Config as environment variable path to json file: `CONFIG_PATH=/path/to/config.json`
 
@@ -25,12 +26,12 @@ See the [example service](examples/test_service.go) for usage.
 
 ## Dependencies
 
-service-config depends on [candiedyaml](https://github.com/cloudfoundry-incubator/candiedyaml) for json & yaml parsing.
-
-Install candiedyaml:
+service-config depends on [candiedyaml](https://github.com/cloudfoundry-incubator/candiedyaml) for json & yaml parsing and
+on [mergo](https://github.com/imdario/mergo) merging defaults.
 
 ```
 $ go get -u github.com/cloudfoundry-incubator/candiedyaml
+$ go get -u github.com/imdario/mergo
 ```
 
 ## Limitations
@@ -42,14 +43,14 @@ To allow empty values in the config properties (e.g. `-config={ "password": "" }
 
 For example, the following default config would allow a blank password to be provided:
 ```
-err := reader.ReadWithDefaults(&config, DefaultConfig{
+serviceConfig.AddDefaults(Config{
    password: "",
 })
 ```
 
 While this example would not allow the provided password to be blank:
 ```
-err := reader.ReadWithDefaults(&config, DefaultConfig{
+serviceConfig.AddDefaults(Config{
    password: "password",
 })
 ```
