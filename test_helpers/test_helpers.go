@@ -1,8 +1,6 @@
 package test_helpers
 
 import (
-	. "github.com/onsi/gomega"
-
 	"errors"
 	"fmt"
 	"reflect"
@@ -42,29 +40,48 @@ func setFieldToEmpty(obj interface{}, fieldName string) error {
 	return setNestedFieldToEmpty(obj, strings.Split(fieldName, "."))
 }
 
-func IsRequiredField(obj Validator, fieldName string) func() {
-	return func() {
-		err := setFieldToEmpty(obj, fieldName)
-		Expect(err).NotTo(HaveOccurred())
+func IsRequiredField(obj interface{}, fieldName string) error {
+	err := setFieldToEmpty(obj, fieldName)
+	if err != nil {
+		return err
+	}
 
-		err = obj.Validate()
+	v, ok := obj.(Validator)
+	if !ok {
+		return errors.New("object under test does not implement Validator interface")
+	}
 
-		Expect(err).To(HaveOccurred())
+	err = v.Validate()
+	if err == nil {
+		return errors.New(fmt.Sprintf("expected Validate to fail when '%s' is empty", fieldName))
+	}
 
-		fieldParts := strings.Split(fieldName, ".")
-		for _, fieldPart := range fieldParts {
-			Expect(err.Error()).To(ContainSubstring(fieldPart))
+	fieldParts := strings.Split(fieldName, ".")
+	for _, fieldPart := range fieldParts {
+		if !strings.Contains(err.Error(), fieldPart) {
+			return errors.New(fmt.Sprintf("expected Validate error\n%s\nto contain\n'%s'",
+				err.Error(), fieldPart))
 		}
 	}
+
+	return nil
 }
 
-func IsOptionalField(obj Validator, fieldName string) func() {
-	return func() {
-		err := setFieldToEmpty(obj, fieldName)
-		Expect(err).NotTo(HaveOccurred())
-
-		err = obj.Validate()
-
-		Expect(err).NotTo(HaveOccurred())
+func IsOptionalField(obj interface{}, fieldName string) error {
+	err := setFieldToEmpty(obj, fieldName)
+	if err != nil {
+		return err
 	}
+
+	v, ok := obj.(Validator)
+	if !ok {
+		return errors.New("object under test does not implement Validator interface")
+	}
+
+	err = v.Validate()
+	if err != nil {
+		return errors.New(fmt.Sprintf("expected Validate to succeed when '%s' is empty\nValidate error: %s", fieldName, err))
+	}
+
+	return nil
 }
