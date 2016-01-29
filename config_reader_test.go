@@ -27,20 +27,20 @@ School:
 `
 
 	type ConfigSimple struct {
-		Name string
+		Name string `yaml:"Name"`
 	}
 	type ConfigInvalid struct {
-		Count int
+		Count int `yaml:"Count"`
 	}
 	type School struct {
-		Name     string
-		Location string
+		Name     string `yaml:"Name"`
+		Location string `yaml:"Location"`
 	}
 
 	type ConfigNested struct {
-		Name     string
-		Password string
-		School   School
+		Name     string `yaml:"Name"`
+		Password string `yaml:"Password"`
+		School   School `yaml:"School"`
 	}
 
 	Describe("Read", func() {
