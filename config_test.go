@@ -238,7 +238,7 @@ var _ = Describe("ServiceConfig", func() {
 
 		It("Prints the default config options", func() {
 			Expect(stderr).To(ContainSubstring("Default config values:"))
-			Expect(stderr).To(MatchRegexp("\"Active\":\\s*true"))
+			Expect(stderr).To(MatchRegexp("Active:\\s*true"))
 		})
 	})
 })
